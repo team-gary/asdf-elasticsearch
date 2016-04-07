@@ -12,7 +12,7 @@ Riak plugin for [asdf](https://github.com/asdf-vm/asdf) version manager
 1. You will need erlang > R16B02
   * Mac and Ubuntu 
     1. ```asdf plugin-add erlang https://github.com/asdf-vm/asdf-erlang.git``` 
-    2. ```asdf erlang install 18.3```
+    2. ```asdf install erlang 18.3```
     3. then make sure and set up your .tool-versions file.  Check out the [asdf](https://github.com/asdf-vm/asdf) docs for more detail
   * Ubuntu 
 
