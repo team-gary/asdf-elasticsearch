@@ -24,8 +24,9 @@ install_riak() {
     # we unset it here because echo-ing changes the return value of the function
     unset ASDF_PKG_MISSING
 
-    make locked-deps || exit 1
-    make rel || exit 1
+    echo "erlang 17.5" > .tool-versions
+    asdf install
+    make all rel || exit 1
     cd rel || exit 1
     mv riak/* $ASDF_INSTALL_PATH || exit 1
   )
@@ -52,7 +53,7 @@ download_source() {
   local download_path=$3
   local download_url=$(get_download_url $install_type $version)
 
-  curl -Lo $download_path -C - $download_url
+  curl -sLo $download_path -C - $download_url
 }
 
 
@@ -72,6 +73,5 @@ get_download_url() {
   local version_major=${version%.*}
   echo "http://s3.amazonaws.com/downloads.basho.com/riak/$version_major/$version/riak-$version.tar.gz"
 }
-
 
 install_riak $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH
