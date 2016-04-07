@@ -24,7 +24,10 @@ install_riak() {
     # we unset it here because echo-ing changes the return value of the function
     unset ASDF_PKG_MISSING
 
+    make locked-deps || exit 1
     make rel || exit 1
+    cd rel || exit 1
+    mv riak/* $ASDF_INSTALL_PATH || exit 1
   )
 }
 
