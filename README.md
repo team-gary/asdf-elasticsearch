@@ -3,17 +3,25 @@
 Riak plugin for [asdf](https://github.com/asdf-vm/asdf) version manager
 
 ## Dependencies
+1. Your default ulimits will be low.  You'll most likely need to increase your ulimits.
 1. You will need a compiler.
   * Mac
     1. ```gcc```
     1. Hit the ok button and it will install.  If it already has it, then you are good.
   * Ubuntu  
     1. ```sudo apt-get install linux-headers-$(uname -r) build-essential```
-1. You will need erlang > R16B02
+1. You're going to need some libs
+  * Mac
+    1. None known yet
+  * Ubuntu
+    1. ```sudo apt-get install libpam0g-dev```
+    1. ```sudo apt-get install libncurses-dev```
+    1. ```sudo apt-get install openssl libssl-dev```
+1. You will need erlang > R16B02, but not R18 yet.  I'm recommending 17.5
   * Mac and Ubuntu 
     1. ```asdf plugin-add erlang https://github.com/asdf-vm/asdf-erlang.git``` 
-    2. ```asdf install erlang 17.5```
-    3. then make sure and set up your .tool-versions file.  Check out the [asdf](https://github.com/asdf-vm/asdf) docs for more detail
+    1. ```asdf install erlang 17.5```
+    1. then make sure and set up your .tool-versions file.  Check out the [asdf](https://github.com/asdf-vm/asdf) docs for more detail
   * Ubuntu 
 
 ## Install
