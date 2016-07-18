@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-install_riak() {
+install_elasticsearch() {
   local install_type=$1
   local version=$2
   local install_path=$3
@@ -21,14 +21,15 @@ install_riak() {
     tar zxf $source_path || exit 1
     cd $(untar_path $install_type $version $tmp_download_dir)
 
-    # we unset it here because echo-ing changes the return value of the function
-    unset ASDF_PKG_MISSING
 
-    echo "erlang 17.5" > .tool-versions
-    asdf install
-    make all rel || exit 1
-    cd rel || exit 1
-    mv riak/* $ASDF_INSTALL_PATH || exit 1
+    # Remove windows related files
+    (
+      cd elasticsearch-$version
+      find . -name "*.exe" -print0 | xargs -0 rm
+      find . -name "*.bat" -print0 | xargs -0 rm
+    )
+
+    mv elasticsearch-$version/* $ASDF_INSTALL_PATH || exit 1
   )
 }
 
@@ -40,9 +41,9 @@ untar_path() {
 
   if [ "$install_type" = "version" ]
   then
-    echo "$tmp_download_dir/riak-${version}"
+    echo "$tmp_download_dir/elasticsearch-${version}"
   else
-    echo "$tmp_download_dir/riak-${version}"
+    echo "$tmp_download_dir/elasticsearch-${version}"
   fi
 }
 
@@ -61,7 +62,7 @@ get_download_file_path() {
   local install_type=$1
   local version=$2
   local tmp_download_dir=$3
-  local pkg_name="riak-${version}.tar.gz"
+  local pkg_name="elasticsearch-${version}.tar.gz"
 
   echo "$tmp_download_dir/$pkg_name"
 }
@@ -70,8 +71,7 @@ get_download_file_path() {
 get_download_url() {
   local install_type=$1
   local version=$2
-  local version_major=${version%.*}
-  echo "http://s3.amazonaws.com/downloads.basho.com/riak/$version_major/$version/riak-$version.tar.gz"
+  echo "https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-$version.tar.gz"
 }
 
-install_riak $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH
+install_elasticsearch $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH
