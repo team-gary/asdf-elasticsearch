@@ -23,13 +23,10 @@ install_elasticsearch() {
 
 
     # Remove windows related files
-    (
-      cd elasticsearch-$version
-      find . -name "*.exe" -print0 | xargs -0 rm
-      find . -name "*.bat" -print0 | xargs -0 rm
-    )
+    find . -name "*.exe" -print0 | xargs -0 rm
+    find . -name "*.bat" -print0 | xargs -0 rm
 
-    mv elasticsearch-$version/* $ASDF_INSTALL_PATH || exit 1
+    mv ./* $ASDF_INSTALL_PATH || exit 1
   )
 }
 
