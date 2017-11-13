@@ -64,11 +64,16 @@ get_download_file_path() {
   echo "$tmp_download_dir/$pkg_name"
 }
 
+function version { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
 
 get_download_url() {
   local install_type=$1
   local version=$2
-  echo "https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-$version.tar.gz"
+  if [ $(version $version) -ge $(version "2.4.6") ]; then
+    echo "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$version.tar.gz"
+  else
+    echo "https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-$version.tar.gz"
+  fi
 }
 
 install_elasticsearch $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH
