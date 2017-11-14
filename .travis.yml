@@ -1,0 +1,8 @@
+language: java
+script: asdf plugin-test elasticsearch https://github.com/mikestephens/asdf-elasticsearch.git "elasticsearch --version"
+before_script:
+  - git clone https://github.com/asdf-vm/asdf.git
+  - . asdf/asdf.sh
+os:
+  - linux
+  - osx
