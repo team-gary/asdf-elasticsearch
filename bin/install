@@ -51,7 +51,7 @@ download_source() {
   local download_path=$3
   local download_url=$(get_download_url $install_type $version)
 
-  curl -sLo $download_path -C - $download_url
+  curl -SLfo $download_path -C - $download_url
 }
 
 
