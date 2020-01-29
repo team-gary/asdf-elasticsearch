@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 releases_path=https://api.github.com/repos/elastic/elasticsearch/tags?per_page=100
 total_pages=$(curl -I $releases_path | awk -F'[=>]' '/Link:/ {print $(NF-2)}')
 current_page=1

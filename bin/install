@@ -1,87 +1,78 @@
 #!/usr/bin/env bash
+set -eu
+[ "${BASH_VERSINFO[0]}" -ge 3 ] && set -o pipefail
 
-install_elasticsearch() {
-  local install_type=$1
-  local version=$2
-  local install_path=$3
+get_platform () {
+	local platform="$(uname | tr '[:upper:]' '[:lower:]')"
 
-  if [ "$TMPDIR" = "" ]; then
-    local tmp_download_dir=$(mktemp -d)
-  else
-    local tmp_download_dir=$TMPDIR
-  fi
+	case "$platform" in
+		linux|darwin|freebsd)
+			echo "Platform '${platform}' supported!" >&2
+			;;
+		*)
+			echo "Platform '${platform}' not supported!" >&2
+			exit 1
+			;;
+	esac
 
-  local source_path=$(get_download_file_path $install_type $version $tmp_download_dir)
-  download_source $install_type $version $source_path
-
-  # running this in a subshell
-  # because we don't want to disturb current working dir
-  (
-    cd $(dirname $source_path)
-    tar zxf $source_path || exit 1
-    cd $(untar_path $install_type $version $tmp_download_dir)
-
-
-    # Remove windows related files
-    find . -name "*.exe" -print0 | xargs -0 rm
-    find . -name "*.bat" -print0 | xargs -0 rm
-
-    mv ./* $ASDF_INSTALL_PATH || exit 1
-  )
+	echo -n $platform
 }
 
+get_arch () {
+	local arch=""
 
-untar_path() {
-  local install_type=$1
-  local version=$2
-  local tmp_download_dir=$3
+	case "$(uname -m)" in
+		x86_64|amd64) arch="amd64"; ;;
+		i686|i386) arch="386"; ;;
+		armv6l|armv7l) arch="armv6l"; ;;
+		aarch64) arch="arm64"; ;;
+		ppc64le) arch="ppc64le"; ;;
+		*)
+			echo "Arch '$(uname -m)' not supported!" >&2
+			exit 1
+			;;
+	esac
 
-  if [ "$install_type" = "version" ]
-  then
-    echo "$tmp_download_dir/elasticsearch-${version}"
-  else
-    echo "$tmp_download_dir/elasticsearch-${version}"
-  fi
+	echo -n $arch
 }
 
-
-download_source() {
-  local install_type=$1
-  local version=$2
-  local download_path=$3
-  local download_url=$(get_download_url $install_type $version)
-
-  curl -SLfo $download_path -C - $download_url
+my_mktemp () {
+	local tempdir=""
+	if [ "linux" = "$1" ] ; then
+		tempdir=$(mktemp -d asdf-golang.XXXX)
+	else
+		tempdir=$(mktemp -dt asdf-golang.XXXX)
+	fi
+	echo -n $tempdir
 }
-
-
-get_download_file_path() {
-  local install_type=$1
-  local version=$2
-  local tmp_download_dir=$3
-  local pkg_name="elasticsearch-${version}.tar.gz"
-
-  echo "$tmp_download_dir/$pkg_name"
-}
-
-function version { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
 
 get_download_url() {
-  local install_type=$1
-  local version=$2
-  local operating_system=$(uname -a)
+  local version=$1
+  local platform=$2
 
-  if [ $(version $version) -ge $(version "7.0.0") ]; then
-    if [[ "$operating_system" =~ "Darwin" ]]; then
-      echo "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$version-darwin-x86_64.tar.gz"
-    else
-      echo "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$version-linux-x86_64.tar.gz"
-    fi
-  elif [ $(version $version) -gt $(version "2.4.6") ]; then
+  if [ $version == "7.0.0" ]; then
+    echo "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$version-$platform-x86_64.tar.gz"
+  elif [ $version == "2.4.6" ]; then
     echo "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$version.tar.gz"
   else
     echo "https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-$version.tar.gz"
   fi
+}
+
+install_elasticsearch () {
+    local install_type=$1
+    local version=$2
+    local install_path=$3
+    local platform=$(get_platform)
+    local arch=$(get_arch)
+    local tempdir=$(my_mktemp $platform)
+		local download_url=$(get_download_url $version $platform)
+
+    curl $download_url -o "${tempdir}/archive.tar.gz"
+
+    tar -C "$install_path" -xzf "${tempdir}/archive.tar.gz"
+
+    rm -rf "${tempdir}"
 }
 
 install_elasticsearch $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH
